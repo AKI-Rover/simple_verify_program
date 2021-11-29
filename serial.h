@@ -41,7 +41,9 @@
 extern int serial_fd[20]; /** File Descriptor for Serial Port */
 extern struct termios oldtio[20], newtio[20]; /** */
 
+int init_motor_serial(int mdv_num) /** Initialize Serial Port for Motor Driver */
 int init_serial(int srl_num); /** Initialize Serial Port */
+int open_motor_serial(int mdv_num) /** Open Serial Port for Motor Driver */
 
 
 #endif

@@ -45,7 +45,7 @@ void mdv_duty_set(int mdv_num, int drv_dty) {
 	memset(cmd_buf, 0, SBUF_CMD_SIZE);
 	num_cmd_dat = make_mdv_cmd_duty_set(mdv_num, drv_dty, cmd_buf);
 
-	fd = init_serial(fd_array[mdv_num]);
+	fd = open_motor_serial(mdv_num);
 	if(fd < 0) {
 		printf("Serial Open Error\n");
 	} else {
@@ -75,7 +75,7 @@ void mdv_mtr_stp(int mdv_num, char mtr_stat) {
 	num_cmd_dat = make_mdv_cmd_mtr_stp(mdv_num, mtr_stat, cmd_buf);
 	// printf("mdv_num:%d\tslc_srl_nmb:%d\tserial_fd:%d\n", mdv_num, slc_srl_nmb, serial_fd[slc_srl_nmb]);
 
-	fd = init_serial(fd_array[mdv_num]);
+	fd = open_motor_serial(mdv_num);
 	if(fd < 0) {
 		printf("Serial Open Error\n");
 	} else {
@@ -99,24 +99,32 @@ void get_mtr_ctrl_param(int mdv_num, char ctrl_param) {
 	char cmd_buf[SBUF_CMD_SIZE];
 	char tlm_buf[SBUF_TLM_SIZE];
 	int res;
+	int fd;
 	int num_cmd_dat;
 	int slc_srl_nmb = fd_array[mdv_num];
 	memset(cmd_buf, 0, SBUF_CMD_SIZE);
 	memset(tlm_buf, 0, SBUF_CMD_SIZE);
-
 	num_cmd_dat = make_mdv_cmd_tlm_snd(mdv_num, ctrl_param, cmd_buf);
-	res = write(serial_fd[slc_srl_nmb], cmd_buf, num_cmd_dat);
 
-	if(res < 0) {
-		printf("Write Error for #%d: %s\n at get_mtr_ctrl_param", slc_srl_nmb, strerror(errno));
-	}
-	usleep(1000);
-
-	res = read(serial_fd[slc_srl_nmb], tlm_buf, SBUF_TLM_SIZE);
-	if(res < 0) {
-		printf("Read Error in telemetry at get_mtr_ctrl_param\n");
+	fd = open_motor_serial(mdv_num);
+	if(fd < 0) {
+		printf("Serial Open Error\n");
 	} else {
-		tlm_buf[res] = 0;
+		res = write(fd, cmd_buf, num_cmd_dat);
+
+		if(res < 0) {
+			printf("Write Error for #%d: %s\n at get_mtr_ctrl_param", slc_srl_nmb, strerror(errno));
+		}
+		usleep(1000);
+
+		res = read(fd, tlm_buf, SBUF_TLM_SIZE);
+		if(res < 0) {
+			printf("Read Error in telemetry at get_mtr_ctrl_param\n");
+		} else {
+			tlm_buf[res] = 0;
+		}
+		int fd_close_status = 0;
+		fd_close_status = close(fd);
 	}
 }
 

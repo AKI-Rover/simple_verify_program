@@ -11,16 +11,13 @@
 
 #include <fcntl.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <termios.h>
 #include <unistd.h>
-#include <string.h>
 
 #include "serial.h"
-
-int serial_fd[20];
-struct termios oldtio[20], newtio[20];
 
 /**
  * @brief Initalize Serial
@@ -30,7 +27,7 @@ struct termios oldtio[20], newtio[20];
 int init_serial(int srl_num) {
 	int open_flag = 0;
 	int res;
-	int fd;							 //ファイルディスクリプタ
+	int fd;
 	struct termios old_dummy;		 //シリアル通信設定
 
 	//Open Serial Port
@@ -134,40 +131,40 @@ int init_serial(int srl_num) {
 		return -1;
 	}
 
-	memset(&newtio[srl_num], 0, sizeof(newtio[srl_num]));
-	newtio[srl_num] = old_dummy;		// ポートの設定をコピー
-	newtio[srl_num].c_cflag = CS8 | CLOCAL | CREAD;
+	memset(&newtio, 0, sizeof(newtio));
+	newtio = old_dummy;		   // ポートの設定をコピー
+	newtio.c_cflag = CS8 | CLOCAL | CREAD;
 
 	if((srl_num >= 8) && (srl_num <= 19)) {
-		newtio[srl_num].c_iflag = ICRNL | IGNPAR;
-		newtio[srl_num].c_cc[VMIN] = 1;		   //
-		newtio[srl_num].c_cc[VEOF] = 0;
-		newtio[srl_num].c_cc[VEOL] = 0;
-		newtio[srl_num].c_oflag = 0;
-		newtio[srl_num].c_lflag = 0;
+		newtio.c_iflag = ICRNL | IGNPAR;
+		newtio.c_cc[VMIN] = 1;		  //
+		newtio.c_cc[VEOF] = 0;
+		newtio.c_cc[VEOL] = 0;
+		newtio.c_oflag = 0;
+		newtio.c_lflag = 0;
 	}
 
-	newtio[srl_num].c_cc[VTIME] = 0; /* キャラクタ間タイマを使わない */
+	newtio.c_cc[VTIME] = 0; /* キャラクタ間タイマを使わない */
 
 	if((srl_num >= 8) && (srl_num <= 19)) {
-		res = cfsetispeed(&newtio[srl_num], SERIAL_BAUDRATE_MDV);
+		res = cfsetispeed(&newtio, SERIAL_BAUDRATE_MDV);
 		if(res < 0)
 			printf("cfsetspeed error \n");
-		res = cfsetospeed(&newtio[srl_num], SERIAL_BAUDRATE_MDV);
+		res = cfsetospeed(&newtio, SERIAL_BAUDRATE_MDV);
 		if(res < 0)
 			printf("cfsetspeed error \n");
 	} else if((srl_num == 0) || (srl_num == 1)) {
-		res = cfsetispeed(&newtio[srl_num], SERIAL_BAUDRATE_RU);
+		res = cfsetispeed(&newtio, SERIAL_BAUDRATE_RU);
 		if(res < 0)
 			printf("cfsetspeed error \n");
-		res = cfsetospeed(&newtio[srl_num], SERIAL_BAUDRATE_RU);
+		res = cfsetospeed(&newtio, SERIAL_BAUDRATE_RU);
 		if(res < 0)
 			printf("cfsetspeed error \n");
 	} else {
-		res = cfsetispeed(&newtio[srl_num], SERIAL_BAUDRATE_NMN);
+		res = cfsetispeed(&newtio, SERIAL_BAUDRATE_NMN);
 		if(res < 0)
 			printf("cfsetspeed error \n");
-		res = cfsetospeed(&newtio[srl_num], SERIAL_BAUDRATE_NMN);
+		res = cfsetospeed(&newtio, SERIAL_BAUDRATE_NMN);
 		if(res < 0)
 			printf("cfsetspeed error \n");
 	}
@@ -180,13 +177,179 @@ int init_serial(int srl_num) {
 		return -1;
 	}
 
-	res = tcsetattr(fd, TCSANOW, &newtio[srl_num]);		   // ポートの設定を有効にする
+	res = tcsetattr(fd, TCSANOW, &newtio);		  // ポートの設定を有効にする
 	if(res) {
 		printf("tcsetattr error \n");
 		close(fd);
 		printf("tcsetattr close\n");
 		return -1;
 	}
-	oldtio[srl_num] = old_dummy;
+	// oldtio[srl_num] = old_dummy;
 	return fd;
+}
+
+/**
+ * @brief Initialize serial port for motor driver
+ * 
+ * @param mdv_num Motor number
+ * @return void
+ */
+void init_motor_serial(int mdv_num) {
+	int res, fd = 0;
+	int fd_array[] = {12, 8, 15, 10, 13, 9, 14, 11};
+	int srl_num = fd_array[mdv_num];
+	struct termios old_dummy, newtio;
+
+	// Open serial port
+	switch(srl_num) {
+		case 8:
+			fd = open(SERIAL_PORT_USB0, O_RDWR | O_NOCTTY | O_NONBLOCK);
+			usleep(2000);
+			break;
+		case 9:
+			fd = open(SERIAL_PORT_USB1, O_RDWR | O_NOCTTY | O_NONBLOCK);
+			usleep(2000);
+			break;
+		case 10:
+			fd = open(SERIAL_PORT_USB2, O_RDWR | O_NOCTTY | O_NONBLOCK);
+			usleep(2000);
+			break;
+		case 11:
+			fd = open(SERIAL_PORT_USB3, O_RDWR | O_NOCTTY | O_NONBLOCK);
+			usleep(2000);
+			break;
+		case 12:
+			fd = open(SERIAL_PORT_USB4, O_RDWR | O_NOCTTY | O_NONBLOCK);
+			usleep(2000);
+			break;
+		case 13:
+			fd = open(SERIAL_PORT_USB5, O_RDWR | O_NOCTTY | O_NONBLOCK);
+			usleep(2000);
+			break;
+		case 14:
+			fd = open(SERIAL_PORT_USB6, O_RDWR | O_NOCTTY | O_NONBLOCK);
+			usleep(2000);
+			break;
+		case 15:
+			fd = open(SERIAL_PORT_USB7, O_RDWR | O_NOCTTY | O_NONBLOCK);
+			usleep(2000);
+			break;
+		default:
+			fd = -1;
+	}
+
+	if(fd < 0) {
+		printf("Fail to open serial for driver #%d\n", srl_num);
+		return fd;
+	} else {
+		// printf("Open serial port #%d \n", srl_num);
+		// printf("fd=%d, serial_fd[%d]=%d\n", fd, srl_num, serial_fd[srl_num]);
+	}
+
+	res = tcgetattr(fd, &old_dummy);		// 端末制御情報の取得
+	if(res) {
+		printf("tcgetattr error \n");
+		close(fd);
+		printf("tcgetattr close\n");
+		return -1;
+	}
+
+	/* Set serial port */
+	memset(&newtio, 0, sizeof(newtio));
+	newtio = old_dummy;							  // ポートの設定をコピー
+	newtio.c_cflag = CS8 | CLOCAL | CREAD;		  // 送受信文字に8bitを使用，Modern Stetus Lineを無視，文字の受信可能
+	newtio.c_iflag = ICRNL | IGNPAR;			  // 受信したCarriage Returnを改行に変換，Parity Error文字を無視
+	newtio.c_cc[VMIN] = 1;						  // 非カノニカル読み込み時の最小文字数
+	newtio.c_cc[VEOF] = 0;						  // ファイル終端の文字
+	newtio.c_cc[VEOL] = 0;						  // 追加の行末文字
+	newtio.c_cc[VTIME] = 0;						  // キャラクタ間タイマを使わない
+	newtio.c_oflag = 0;							  //
+	newtio.c_lflag = 0;							  //
+
+	/* Set input baudrate */
+	res = cfsetispeed(&newtio, SERIAL_BAUDRATE_MDV);
+	if(res < 0) {
+		printf("cfsetspeed error \n");
+	}
+
+	/* Set output baudrate */
+	res = cfsetospeed(&newtio, SERIAL_BAUDRATE_MDV);
+	if(res < 0) {
+		printf("cfsetspeed error \n");
+	}
+
+	/* Flush input date */
+	res = tcflush(fd, TCIFLUSH);
+	if(res < 0) {
+		printf("tcflush error \n");
+		close(fd);
+		printf("tcflush close\n");
+		return -1;
+	}
+
+	/* Set serial port attribute */
+	res = tcsetattr(fd, TCSANOW, &newtio);
+	if(res) {
+		printf("tcsetattr error \n");
+		close(fd);
+		printf("tcsetattr close\n");
+		return -1;
+	}
+
+	close(fd)
+}
+
+/**
+ * @brief Open serial port for motor driver
+ * 
+ * @param mdv_num Motor number
+ * @return int File descriptor
+ */
+int open_motor_serial(int mdv_num) {
+	int fd = 0;
+	int fd_array[] = {12, 8, 15, 10, 13, 9, 14, 11};
+	int srl_num = fd_array[mdv_num];
+
+	// Open serial port
+	switch(srl_num) {
+		case 8:
+			fd = open(SERIAL_PORT_USB0, O_RDWR | O_NOCTTY | O_NONBLOCK);
+			usleep(2000);
+			break;
+		case 9:
+			fd = open(SERIAL_PORT_USB1, O_RDWR | O_NOCTTY | O_NONBLOCK);
+			usleep(2000);
+			break;
+		case 10:
+			fd = open(SERIAL_PORT_USB2, O_RDWR | O_NOCTTY | O_NONBLOCK);
+			usleep(2000);
+			break;
+		case 11:
+			fd = open(SERIAL_PORT_USB3, O_RDWR | O_NOCTTY | O_NONBLOCK);
+			usleep(2000);
+			break;
+		case 12:
+			fd = open(SERIAL_PORT_USB4, O_RDWR | O_NOCTTY | O_NONBLOCK);
+			usleep(2000);
+			break;
+		case 13:
+			fd = open(SERIAL_PORT_USB5, O_RDWR | O_NOCTTY | O_NONBLOCK);
+			usleep(2000);
+			break;
+		case 14:
+			fd = open(SERIAL_PORT_USB6, O_RDWR | O_NOCTTY | O_NONBLOCK);
+			usleep(2000);
+			break;
+		case 15:
+			fd = open(SERIAL_PORT_USB7, O_RDWR | O_NOCTTY | O_NONBLOCK);
+			usleep(2000);
+			break;
+		default:
+			fd = -1;
+	}
+
+	if(fd < 0) {
+		printf("Fail to open serial for driver #%d\n", srl_num);
+	}
+	return fd
 }

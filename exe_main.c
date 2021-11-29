@@ -25,7 +25,6 @@
 // 6 -> Left Rear Stir
 // 7 -> Right Rear Stir
 int motor_num = 1;
-int serial_num[] = {12, 8, 15, 10, 13, 9, 14, 11, 0, 0, 0};
 
 /**
  * @brief Ctrl-C Handler
@@ -41,8 +40,7 @@ int main(int argc, char* argv[]) {
 	printf("Initializing\n");
 	signal(SIGINT, ctrl_c_handler);		   //Register Ctrl-C Handler
 
-	// init_serial(serial_num[motor_num]);
-	// init_mdv();
+	init_motor_serial(motor_num);
 	sleep(1);
 
 	int cnt = 0;
