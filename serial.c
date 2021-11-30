@@ -28,7 +28,7 @@ int init_serial(int srl_num) {
 	int open_flag = 0;
 	int res;
 	int fd;
-	struct termios old_dummy;		 //シリアル通信設定
+	struct termios old_dummy, newtio;		 //シリアル通信設定
 
 	//Open Serial Port
 	switch(srl_num) {
@@ -112,7 +112,7 @@ int init_serial(int srl_num) {
 			usleep(2000);
 	}
 
-	serial_fd[srl_num] = fd;		//setup global variables
+	// serial_fd[srl_num] = fd;		//setup global variables
 
 	if(fd < 0) {
 		printf("Fail to open serial for driver #%d\n", srl_num);
@@ -194,7 +194,7 @@ int init_serial(int srl_num) {
  * @param mdv_num Motor number
  * @return void
  */
-void init_motor_serial(int mdv_num) {
+int init_motor_serial(int mdv_num) {
 	int res, fd = 0;
 	int fd_array[] = {12, 8, 15, 10, 13, 9, 14, 11};
 	int srl_num = fd_array[mdv_num];
@@ -296,7 +296,7 @@ void init_motor_serial(int mdv_num) {
 		return -1;
 	}
 
-	close(fd)
+	close(fd);
 }
 
 /**
@@ -351,5 +351,5 @@ int open_motor_serial(int mdv_num) {
 	if(fd < 0) {
 		printf("Fail to open serial for driver #%d\n", srl_num);
 	}
-	return fd
+	return fd;
 }

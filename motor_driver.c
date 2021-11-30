@@ -79,7 +79,7 @@ void mdv_mtr_stp(int mdv_num, char mtr_stat) {
 	if(fd < 0) {
 		printf("Serial Open Error\n");
 	} else {
-		res = write(serial_fd[slc_srl_nmb], cmd_buf, num_cmd_dat);
+		res = write(fd, cmd_buf, num_cmd_dat);
 		if(res < 0) {
 			printf("Write Error for #%d: %s at mdv_mtr_stp\n", slc_srl_nmb, strerror(errno));
 		}
