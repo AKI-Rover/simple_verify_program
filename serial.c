@@ -192,7 +192,7 @@ int init_serial(int srl_num) {
  * @brief Initialize serial port for motor driver
  * 
  * @param mdv_num Motor number
- * @return void
+ * @return int File descriptor
  */
 int init_motor_serial(int mdv_num) {
 	int res, fd = 0;
@@ -297,6 +297,7 @@ int init_motor_serial(int mdv_num) {
 	}
 
 	close(fd);
+	return fd;
 }
 
 /**
