@@ -129,6 +129,45 @@ void get_mtr_ctrl_param(int mdv_num, char ctrl_param) {
 }
 
 /**
+ * @brief Get the Encoder Value
+ *
+ * @param mdv_num Motor Number
+ * @param ctrl_param Control Parameter to get
+ */
+void get_enc_value(int mdv_num, char ctrl_param) {
+	char cmd_buf[SBUF_CMD_SIZE];
+	char tlm_buf[SBUF_TLM_SIZE];
+	int res;
+	int fd;
+	int num_cmd_dat;
+	int slc_srl_nmb = fd_array[mdv_num];
+	memset(cmd_buf, 0, SBUF_CMD_SIZE);
+	memset(tlm_buf, 0, SBUF_CMD_SIZE);
+	num_cmd_dat = make_mdv_cmd_tlm_snd(mdv_num, ctrl_param, cmd_buf);
+
+	fd = open_motor_serial(mdv_num);
+	if(fd < 0) {
+		printf("Serial Open Error\n");
+	} else {
+		res = write(fd, cmd_buf, num_cmd_dat);
+
+		if(res < 0) {
+			printf("Write Error for #%d: %s\n at get_enc_value", slc_srl_nmb, strerror(errno));
+		}
+		usleep(1000);
+
+		res = read(fd, tlm_buf, SBUF_TLM_SIZE);
+		if(res < 0) {
+			printf("Read Error in telemetry at get_enc_value\n");
+		} else {
+			tlm_buf[res] = 0;
+		}
+		int fd_close_status = 0;
+		fd_close_status = close(fd);
+	}
+}
+
+/**
  * @brief Make Command to set duty
  *
  * @param mdv_num Motor Number
@@ -202,6 +241,31 @@ int make_mdv_cmd_enc_clr(int mdv_num, char* buf) {
 	buf[4] = ustoc1(UH_tmp);		//check sum
 	buf[5] = 0;
 	return 6;
+}
+
+/**
+ * @brief Make Command to Get the Encoder Value
+ *
+ * @param mdv_num Motor Number
+ * @param buf Array to store the command
+ * @return 
+ */
+int make_mdv_cmd_get_enc_value(int mdv_num, int ctrl_parm, char* buf) {
+
+	unsigned short UH_tmp = 0;
+	int res;
+	int fd;
+	memset(buf, 0, SBUF_CMD_SIZE);
+
+	buf[0] = 0x02;								   //Header
+	buf[1] = (char)mdv_ch[mdv_num];				   //Driver ID
+	buf[2] = MDV_CMD_ENC_CLR_DAT_SIZ;			   //Length of Command
+	buf[3] = (char)MDV_SCN_CMD_ABS_ENC_CNT;		   //Command ID
+	buf[4] = (char)ctrl_parm;					   //Control Parameter
+	UH_tmp = serial_checksum(&buf[1], 4);
+	buf[5] = ustoc1(UH_tmp);		//check sum
+	buf[6] = 0;
+	return 7
 }
 
 /**
