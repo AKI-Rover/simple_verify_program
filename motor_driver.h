@@ -21,18 +21,18 @@
 #define MDV_CMD_DTY_SET 0x21 /** Command Number of Duty Set */
 #define MDV_CMD_TLM_SND 0x22 /** Command Number of Getting Control Parameter */
 
-#define MDV_TLM_ENC_CLR_DAT_SIZ 1	 /** */
-#define MDV_TLM_DTY_SET_DAT_SIZ 5	 /** */
+#define MDV_TLM_ENC_CLR_DAT_SIZ 1	/** */
+#define MDV_TLM_DTY_SET_DAT_SIZ 5	/** */
 #define MDV_TLM_TLM_SND_DAT_SIZ_00 3 /** */
 #define MDV_TLM_TLM_SND_DAT_SIZ_01 4 /** */
 #define MDV_TLM_TLM_SND_DAT_SIZ_02 4 /** */
 #define MDV_TLM_TLM_SND_DAT_SIZ_03 4 /** */
 #define MDV_TLM_TLM_SND_DAT_SIZ_04 6 /** */
 #define MDV_TLM_TLM_SND_DAT_SIZ_05 6 /** */
-#define MDV_CMD_ENC_CLR_DAT_SIZ 1	 /** */
-#define MDV_CMD_DTY_SET_DAT_SIZ 5	 /** */
-#define MDV_CMD_TLM_SND_DAT_SIZ 2	 /** */
-#define MDV_CMD_MTR_STP_DAT_SIZ 2	 /** */
+#define MDV_CMD_ENC_CLR_DAT_SIZ 1	/** */
+#define MDV_CMD_DTY_SET_DAT_SIZ 5	/** */
+#define MDV_CMD_TLM_SND_DAT_SIZ 2	/** */
+#define MDV_CMD_MTR_STP_DAT_SIZ 2	/** */
 
 #define MDV_SCN_CMD_STT 0			 /** */
 #define MDV_SCN_CMD_DTY 1000		 /** */
@@ -51,13 +51,12 @@
 #define SBUF_CMD_SIZE 255
 #define SBUF_TLM_SIZE 255
 
-extern int mdv_ch[DRV_NMB + STR_NMB];	/**  */
+extern int mdv_ch[DRV_NMB + STR_NMB];   /**  */
 extern int fd_array[DRV_NMB + STR_NMB]; /** */
 
 void mdv_duty_set(int mdv_num, int drv_dty);					 /** */
 void mdv_mtr_stp(int mdv_num, char mtr_stat);					 /** */
-int make_mdv_cmd_duty_set(int mdv_num, int drv_dty, char* buf);	 /** */
-int make_mdv_cmd_enc_clr(int mdv_num, char* buf);				 /** */
+int make_mdv_cmd_duty_set(int mdv_num, int drv_dty, char* buf);  /** */
 int make_mdv_cmd_mtr_stp(int mdv_num, char mtr_stat, char* buf); /** */
 int make_mdv_cmd_tlm_snd(int mdv_num, int ctrl_parm, char* buf); /** */
 unsigned short serial_checksum(char* addr, int leng);			 /** */
