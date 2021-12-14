@@ -21,6 +21,9 @@
 #define MDV_CMD_DTY_SET 0x21 /** Command Number of Duty Set */
 #define MDV_CMD_TLM_SND 0x22 /** Command Number of Getting Control Parameter */
 
+#define MD_CMD_RETURN_DTY_SET 0xA1  /** Command Return Value of Duty Set */
+#define MDV_CMD_RETURN_TLM_SND 0xA2 /** Command Return Value of Getting Control Parameter */
+
 #define MDV_TLM_ENC_CLR_DAT_SIZ 1	/** */
 #define MDV_TLM_DTY_SET_DAT_SIZ 5	/** */
 #define MDV_TLM_TLM_SND_DAT_SIZ_00 3 /** */

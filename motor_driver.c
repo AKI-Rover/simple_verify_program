@@ -38,10 +38,12 @@ void init_mdv(void) {
  */
 void mdv_duty_set(int mdv_num, int drv_dty) {
 	char cmd_buf[SBUF_CMD_SIZE];
+	char tlm_buf[SBUF_TLM_SIZE];
 	int res;
 	int fd;
 	int num_cmd_dat;
 	int slc_srl_nmb = fd_array[mdv_num];
+	int fd_close_status = 0;
 	memset(cmd_buf, 0, SBUF_CMD_SIZE);
 	num_cmd_dat = make_mdv_cmd_duty_set(mdv_num, drv_dty, cmd_buf);
 
@@ -53,8 +55,8 @@ void mdv_duty_set(int mdv_num, int drv_dty) {
 		if(res < 0) {
 			printf("Write Error for #%d: %s at mdv_duty_set\n", slc_srl_nmb, strerror(errno));
 		}
-		usleep(1000);
-		int fd_close_status = 0;
+		usleep(20000);
+		res = read(fd, tlm_buf, SBUF_TLM_SIZE);
 		fd_close_status = close(fd);
 	}
 }
@@ -67,10 +69,12 @@ void mdv_duty_set(int mdv_num, int drv_dty) {
  */
 void mdv_mtr_stp(int mdv_num, char mtr_stat) {
 	char cmd_buf[SBUF_CMD_SIZE];
+	char tlm_buf[SBUF_TLM_SIZE];
 	int res;
 	int fd;
 	int num_cmd_dat;
 	int slc_srl_nmb = fd_array[mdv_num];
+	int fd_close_status = 0;
 	memset(cmd_buf, 0, SBUF_CMD_SIZE);
 	num_cmd_dat = make_mdv_cmd_mtr_stp(mdv_num, mtr_stat, cmd_buf);
 	// printf("mdv_num:%d\tslc_srl_nmb:%d\tserial_fd:%d\n", mdv_num, slc_srl_nmb, serial_fd[slc_srl_nmb]);
@@ -83,10 +87,10 @@ void mdv_mtr_stp(int mdv_num, char mtr_stat) {
 		if(res < 0) {
 			printf("Write Error for #%d: %s at mdv_mtr_stp\n", slc_srl_nmb, strerror(errno));
 		}
-		int fd_close_status = 0;
+		usleep(20000);
+		res = read(fd, tlm_buf, SBUF_TLM_SIZE);
 		fd_close_status = close(fd);
 	}
-	usleep(1000);
 }
 
 /**
@@ -96,10 +100,12 @@ void mdv_mtr_stp(int mdv_num, char mtr_stat) {
  */
 void mtr_enc_clr(int mdv_num) {
 	char cmd_buf[SBUF_CMD_SIZE];
+	char tlm_buf[SBUF_TLM_SIZE];
 	int res;
 	int fd;
 	int num_cmd_dat;
 	int slc_srl_nmb = fd_array[mdv_num];
+	int fd_close_status = 0;
 	memset(cmd_buf, 0, SBUF_CMD_SIZE);
 	num_cmd_dat = make_mdv_cmd_enc_clr(mdv_num, cmd_buf);
 
@@ -111,10 +117,10 @@ void mtr_enc_clr(int mdv_num) {
 		if(res < 0) {
 			printf("Write Error for #%d: %s at mdv_mtr_stp\n", slc_srl_nmb, strerror(errno));
 		}
-		int fd_close_status = 0;
+		usleep(20000);
+		res = read(fd, tlm_buf, SBUF_TLM_SIZE);
 		fd_close_status = close(fd);
 	}
-	usleep(1000);
 }
 
 /**
@@ -131,6 +137,8 @@ void get_mtr_ctrl_param(int mdv_num, char ctrl_param) {
 	int i;
 	int num_cmd_dat;
 	int slc_srl_nmb = fd_array[mdv_num];
+	int fd_close_status = 0;
+	long long param_val = 0;
 	memset(cmd_buf, 0, SBUF_CMD_SIZE);
 	memset(tlm_buf, 0, SBUF_CMD_SIZE);
 	num_cmd_dat = make_mdv_cmd_tlm_snd(mdv_num, ctrl_param, cmd_buf);
@@ -148,7 +156,7 @@ void get_mtr_ctrl_param(int mdv_num, char ctrl_param) {
 		if(res < 0) {
 			printf("Write Error for #%d: %s\n at get_mtr_ctrl_param", slc_srl_nmb, strerror(errno));
 		}
-		usleep(10000);
+		usleep(20000);
 
 		res = read(fd, tlm_buf, SBUF_TLM_SIZE);
 		if(res < 0) {
@@ -156,18 +164,30 @@ void get_mtr_ctrl_param(int mdv_num, char ctrl_param) {
 		} else {
 			// tlm_buf[res] = 0;
 		}
-		int fd_close_status = 0;
 		fd_close_status = close(fd);
 		if(res >= 0) {
-			printf("%x ", tlm_buf[0]);
-			printf("%x ", tlm_buf[1]);
-			printf("%x\t", tlm_buf[2]);
-			printf("%x\t", tlm_buf[3]);
-			printf("%x ", tlm_buf[7]);
-			printf("%x ", tlm_buf[6]);
-			printf("%x ", tlm_buf[5]);
-			printf("%x ", tlm_buf[4]);
-			printf("\n");
+			if(tlm_buf[3] == MDV_CMD_RETURN_TLM_SND) {		  // Read Encoder
+				param_val += tlm_buf[7];
+				param_val = param_val << 8;
+				param_val += tlm_buf[6];
+				param_val = param_val << 8;
+				param_val += tlm_buf[5];
+				param_val = param_val << 8;
+				param_val += tlm_buf[4];
+				printf("%x ", tlm_buf[0]);
+				printf("%x ", tlm_buf[1]);
+				printf("%x\t", tlm_buf[2]);
+				printf("%x\t", tlm_buf[3]);
+				printf("%x ", tlm_buf[7]);
+				printf("%x ", tlm_buf[6]);
+				printf("%x ", tlm_buf[5]);
+				printf("%x ", tlm_buf[4]);
+				printf("\t%lld", param_val);
+				printf("\n");
+			} else {
+			}
+		} else {
+			printf("Error : Getting Control Parameter\t%d\t%x\n", res, tlm_buf[3]);
 		}
 	}
 }

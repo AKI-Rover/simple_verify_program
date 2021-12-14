@@ -24,7 +24,7 @@
 // 5 -> Right Front Stir
 // 6 -> Left Rear Stir
 // 7 -> Right Rear Stir
-int motor_num = 2;
+int motor_num = 0;
 
 /**
  * @brief Ctrl-C Handler
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
 	sleep(1);
 
 	int cnt = 0;
-	for(cnt = 0; cnt < 1; cnt++) {
+	for(cnt = 0; cnt < 5; cnt++) {
 		printf("Count : %d\n", cnt);
 		printf("Motor Stop\n");
 		mdv_mtr_stp(motor_num, MTR_STP_STAT_FRE);
@@ -56,7 +56,17 @@ int main(int argc, char* argv[]) {
 		int i = 0;
 		int max_duty = 500;
 		for(i = 0; i <= max_duty; i++) {
-			// mdv_duty_set(motor_num, i);
+			mdv_duty_set(motor_num, i);
+			if(i == 200) {
+				mtr_enc_clr(motor_num);
+				printf("Encoder Cleared\n");
+			}
+			get_mtr_ctrl_param(motor_num, 0x04);		// Encoder Absolute Value
+			usleep(1000);
+		}
+		sleep(1);
+		for(i = max_duty; i >= 0; i--) {
+			mdv_duty_set(motor_num, i);
 			if(i == 200) {
 				mtr_enc_clr(motor_num);
 				printf("Encoder Cleared\n");
