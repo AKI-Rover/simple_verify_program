@@ -134,17 +134,18 @@ int init_serial(int srl_num) {
 	memset(&newtio, 0, sizeof(newtio));
 	newtio = old_dummy;		   // ポートの設定をコピー
 	newtio.c_cflag = CS8 | CLOCAL | CREAD;
-
+	//CS8		-> 8n1
+	//CLOCAL	-> Local connection without Modem control
+	//CREAD		-> Enable receiving characters
 	if((srl_num >= 8) && (srl_num <= 19)) {
-		newtio.c_iflag = ICRNL | IGNPAR;
-		newtio.c_cc[VMIN] = 1;		  //
-		newtio.c_cc[VEOF] = 0;
-		newtio.c_cc[VEOL] = 0;
+		newtio.c_iflag = ICRNL | IGNPAR;		//ICRNL-> Correspond CR with NL, IGNPAR->Ignore data including parity error
+		newtio.c_cc[VMIN] = 1;					//
+		newtio.c_cc[VEOF] = 0;					// Ctrl-d
+		newtio.c_cc[VEOL] = 0;					// \0
 		newtio.c_oflag = 0;
 		newtio.c_lflag = 0;
 	}
-
-	newtio.c_cc[VTIME] = 0; /* キャラクタ間タイマを使わない */
+	newtio.c_cc[VTIME] = 0;		   // キャラクタ間タイマを使わないs
 
 	if((srl_num >= 8) && (srl_num <= 19)) {
 		res = cfsetispeed(&newtio, SERIAL_BAUDRATE_MDV);
@@ -265,6 +266,7 @@ int init_motor_serial(int mdv_num) {
 	newtio.c_cc[VTIME] = 0;						  // キャラクタ間タイマを使わない
 	newtio.c_oflag = 0;							  //
 	newtio.c_lflag = 0;							  //
+	// newtio.c_lflag = ICANON;		//
 
 	/* Set input baudrate */
 	res = cfsetispeed(&newtio, SERIAL_BAUDRATE_MDV);

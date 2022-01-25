@@ -115,11 +115,19 @@ void mtr_enc_clr(int mdv_num) {
 	} else {
 		res = write(fd, cmd_buf, num_cmd_dat);
 		if(res < 0) {
-			printf("Write Error for #%d: %s at mdv_mtr_stp\n", slc_srl_nmb, strerror(errno));
+			printf("Write Error for #%d: %s at mtr_enc_clr\n", slc_srl_nmb, strerror(errno));
 		}
 		usleep(20000);
 		res = read(fd, tlm_buf, SBUF_TLM_SIZE);
 		fd_close_status = close(fd);
+		if(res >= 0) {
+			int i = 0;
+			printf("Encoder Clear\t");
+			for(i = 0; i < 10; i++) {
+				printf("%x ", cmd_buf[i]);
+			}
+			printf("\n");
+		}
 	}
 }
 
