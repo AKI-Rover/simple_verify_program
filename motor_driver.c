@@ -137,7 +137,7 @@ void mtr_enc_clr(int mdv_num) {
  * @param mdv_num Motor Number
  * @param ctrl_param Control Parameter to get
  */
-void get_mtr_ctrl_param(int mdv_num, char ctrl_param) {
+long long get_mtr_ctrl_param(int mdv_num, char ctrl_param) {
 	char cmd_buf[SBUF_CMD_SIZE];
 	char tlm_buf[SBUF_TLM_SIZE];
 	int res;
@@ -150,10 +150,6 @@ void get_mtr_ctrl_param(int mdv_num, char ctrl_param) {
 	memset(cmd_buf, 0, SBUF_CMD_SIZE);
 	memset(tlm_buf, 0, SBUF_CMD_SIZE);
 	num_cmd_dat = make_mdv_cmd_tlm_snd(mdv_num, ctrl_param, cmd_buf);
-	// for(i = 0; i < 7; i++) {
-	// 	printf("%x ", cmd_buf[i]);
-	// }
-	// printf("\n");
 
 	fd = open_motor_serial(mdv_num);
 	if(fd < 0) {
@@ -182,22 +178,23 @@ void get_mtr_ctrl_param(int mdv_num, char ctrl_param) {
 				param_val += tlm_buf[5];
 				param_val = param_val << 8;
 				param_val += tlm_buf[4];
-				printf("%x ", tlm_buf[0]);
-				printf("%x ", tlm_buf[1]);
-				printf("%x\t", tlm_buf[2]);
-				printf("%x\t", tlm_buf[3]);
-				printf("%x ", tlm_buf[7]);
-				printf("%x ", tlm_buf[6]);
-				printf("%x ", tlm_buf[5]);
-				printf("%x ", tlm_buf[4]);
-				printf("\t%lld", param_val);
-				printf("\n");
+				// printf("%x ", tlm_buf[0]);
+				// printf("%x ", tlm_buf[1]);
+				// printf("%x\t", tlm_buf[2]);
+				// printf("%x\t", tlm_buf[3]);
+				// printf("%x ", tlm_buf[7]);
+				// printf("%x ", tlm_buf[6]);
+				// printf("%x ", tlm_buf[5]);
+				// printf("%x ", tlm_buf[4]);
+				// printf("\t%lld", param_val);
+				// printf("\n");
 			} else {
 			}
 		} else {
 			printf("Error : Getting Control Parameter\t%d\t%x\n", res, tlm_buf[3]);
 		}
 	}
+	return param_val;
 }
 
 /**

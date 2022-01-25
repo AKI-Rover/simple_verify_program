@@ -59,6 +59,7 @@ extern int fd_array[DRV_NMB + STR_NMB]; /** */
 
 void mdv_duty_set(int mdv_num, int drv_dty);					 /** */
 void mdv_mtr_stp(int mdv_num, char mtr_stat);					 /** */
+long long get_mtr_ctrl_param(int mdv_num, char ctrl_param);		 /** */
 int make_mdv_cmd_duty_set(int mdv_num, int drv_dty, char* buf);  /** */
 int make_mdv_cmd_mtr_stp(int mdv_num, char mtr_stat, char* buf); /** */
 int make_mdv_cmd_tlm_snd(int mdv_num, int ctrl_parm, char* buf); /** */
